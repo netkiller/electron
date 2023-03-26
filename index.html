@@ -70,9 +70,15 @@
       height: 27px;
     }
 
+    .taskbar {
+      cursor: e-resize;
+    }
 
+    .process {
+      cursor: e-resize;
+    }
 
-    */ #menu {
+    #menu {
       float: left;
       display: block;
     }
@@ -103,32 +109,162 @@
     <button onclick="addRow()">添加</button>
   </div>
 
+  <input type="text" id="text" />
+  <input type="text" id="xy" />
+  <span style="position:absolute;">
+    <div id="div1" style="width:400px;height:160px;border:solid 1px red;">鼠标跟随</div>
+  </span>
+  <script>
+    var t = document.getElementById("text");
+    var div1 = document.getElementById("div1");
+    div1.onmousemove = function (event) {
+      var event = event || window.event;  //标准化事件对象
+      if (event.offsetX || event.offsetY) {
+        t.value = event.offsetX + ":" + event.offsetY;
+      } else if (event.layerX || event.layerY) {
+        t.value = (event.layerX - 1) + "=" + (event.layerY - 1);
+      }
+    }
+
+
+  </script>
+
 </body>
-<script src="table.js"></script>
-<script src="gantt.js"></script>
+<script src="js/table.js"></script>
+<script src="js/gantt.js"></script>
 <script type="text/javascript">
   // <![CDATA[
 
+  mouseStatus = true;
+  // gantt = new Gantt('2022-12-26','2023-04-05')
+  gantt = new Gantt('2022-12-26', '2023-01-15')
+  gantt.calendar();
+  gantt.table();
 
-  gantt = new Gantt('2022-12-26','2023-04-05')
-  gantt.calendar()
-  gantt.addTask()
-  gantt.addTask()
-  gantt.addTask()
-  gantt.addTask()
-  gantt.addTask()
+
+
+  gantt.addBar(1, '2022-12-26', '2022-12-29');
+  gantt.addBar(2, '2022-12-29', '2022-12-31')
+  gantt.addBar(3, '2022-12-31', '2023-01-01')
+  gantt.addBar(4, '2022-12-30', '2023-01-10');
+  gantt.addBar(5, '2022-12-27', '2023-01-15');
+  // 
+  // 
   // var draw = SVG('#drawing')
   // group.rect(100, 100).animate().fill('#f03').move(100, 100)
 
-  addTask();
-  addTask();
-  addTask();
-  addTask();
-  addTask();
+  gantt.addTask(1, '测试', '2022-12-26', '2022-12-29');
+  gantt.addTask(2, 'AAA', '2022-12-26', '2022-12-29');
+  gantt.addTask(3, 'BBB', '2022-12-26', '2022-12-29');
+  gantt.addTask(4, 'CCC', '2022-12-26', '2022-12-29');
+  gantt.addTask(5, 'EEE', '2022-12-26', '2022-12-29');
+
   function addRow() {
-    addTask();
-    gantt.addTask()
+    gantt.addTask();
+    gantt.addBar()
   }
+
+
+  function moveProcess(id) {
+    var mouseStatus = false;
+    // var svg = document.getElementById("svg");
+    var task = document.getElementById("task" + id);
+    var process = document.getElementById("process" + id);
+
+    var xy = document.getElementById("xy");
+
+    start = task.x.baseVal.value;
+    width = start + task.width.baseVal.value;
+
+    // console.log(process.style['width'])
+    // console.log(process.x.baseVal.value)
+    task.onmousemove = function (event) {
+
+      var event = event || window.event;
+      var x = (event.offsetX || event.layerX) - start
+
+      console.log(start, width, x);
+      if (mouseStatus == true && x <= width) {
+        process.style['width'] = x;
+      }
+    }
+    task.onmousedown = function (event) {
+      var event = event || window.event;
+      var x = (event.offsetX || event.layerX) - start
+      if (x <= width) {
+        process.style['width'] = x;
+      }
+
+    }
+    process.onmousedown = function (event) {
+      var event = event || window.event;
+      var x = (event.offsetX || event.layerX) - start
+      if (x <= width) {
+        process.style['width'] = x;
+      }
+    }
+    // process.onmousemove = function (event) {
+
+    //   var event = event || window.event;
+    //   var x = (event.offsetX || event.layerX)
+
+    //   console.log(start, width, x);
+    //   if (mouseStatus == true && x < width) {
+    //     process.style['width'] = x - start;
+    //   }
+    // }
+    // task.onmousemove = function (event) {
+
+    //   var event = event || window.event;  //标准化事件对象
+    //   if (event.offsetX || event.offsetY) {
+
+    //     if (mouseStatus == true) {
+    //       process.style['width'] = event.offsetX;
+    //     }
+
+    //   } else if (event.layerX || event.layerY) {
+
+    //     if (mouseStatus == true) {
+    //       process.style['width'] = event.layerX;
+    //     }
+    //   }
+    // }
+    // process.onmousemove = function (event) {
+
+    //   var event = event || window.event;  //标准化事件对象
+    //   if (event.offsetX || event.offsetY) {
+
+    //     if (mouseStatus == true) {
+    //       process.style['width'] = event.offsetX;
+    //     }
+
+    //   } else if (event.layerX || event.layerY) {
+
+    //     if (mouseStatus == true) {
+    //       process.style['width'] = event.layerX;
+    //     }
+    //   }
+    // }
+
+    // task.onmousedown = function (event) {
+    //   var event = event || window.event;
+    //   var width = event.offsetX || event.layerX
+    //   process.style['width'] = width;
+    // }
+    // process.onmouseup = function (event) {
+    //   var event = event || window.event;
+    //   var width = event.offsetX || event.layerX
+    //   process.style['width'] = width;
+    // }
+
+    window.onmousedown = function (event) {
+      mouseStatus = true;
+    }
+    window.onmouseup = function (event) {
+      mouseStatus = false;
+    }
+  }
+
 
   // ]]>
 </script>
