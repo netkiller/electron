@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SVG.js</title>
+  <script src="svg/svg.min.js"></script>
+</head>
+<body>
+</body>
+<script>
+  /**
+  * 圆形的动画demo，参考bonsai动画
+  */
+  var draw = SVG().addTo('body').size(800, 600)
+  var rect = draw.rect(100, 100).attr({ fill: '#f06' })
+//   const centerX = 400,
+//     centerY = 300,
+//     circles = 140,
+//     distance = 180,
+//     radiusMin = 10,
+//     radiusVar = 10;
+
+//   const random = Math.random;
+//   const posList = [];
+//   for (var i = 0; i < circles; ++i) {
+//     const f = i / circles,
+//         x = centerX + distance * Math.sin(f*2*Math.PI),
+//         y = centerY + distance * -Math.cos(f*2*Math.PI),
+//         radius = random() * radiusVar + radiusMin;
+    
+//     posList.push([x,y]);
+//     draw.circle(radius).attr({fill: randomColor()}).move(x, y);
+//   }
+
+//   const children = draw.children();
+//   const spread = 40;
+
+//   function render() {
+//     for (let i = 0; i < children.length; i++) {
+//       const circle = children[i];
+//       const pos = posList[i];
+//       const x = pos[0] + spread * random() - spread / 2;
+//       const y = pos[1] + spread * random() - spread / 2;
+    
+//       circle.animate({
+//         duration: 200,
+//         delay: 0,
+//         when: 'now',
+//         swing: true,
+//         times: 1,
+//         wait: 0
+//       }).ease('sineInOut').move(x, y) //sineInOut elastic
+//     }
+//   }
+
+//   var loopCnt = 0;
+//   (function animloop() {
+//     if (0===loopCnt%13) { // one 16ms.
+//       render();
+//     }
+//     loopCnt++;
+//     window.requestAnimationFrame(animloop);
+//   })();
+
+</script>
+</html>
