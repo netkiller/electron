@@ -130,10 +130,10 @@ class Gantt {
             moveProcess(id);
         }))
 
-        group.add(this.draw.rect(0, this.barHeight - 3).attr({ x: x, y: this.top + 6, fill: '#ffee00', 'id': 'process' + id, 'class': 'process' }))
-        // .click(function () {
-        //     this.fill({ color: '#ffffff' })
-        // })
+        group.add(this.draw.rect(0, this.barHeight - 6).attr({ x: x, y: this.top + 8, fill: '#ffee00', 'id': 'process' + id, 'class': 'process' }).click(function () {
+            // this.fill({ color: '#ffffff' })
+            moveProcess(id);
+        }))
         group.add(this.draw.line(0, this.top + this.rowHeight, '100%', this.top + this.rowHeight).stroke('grey'));
         this.draw.add(group);
         this.top += this.rowHeight;
