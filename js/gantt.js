@@ -8,6 +8,7 @@ class Gantt {
     beginDate = '';
     endDate = '';
     datePosition = new Map();
+    resource = new Map();
 
     // var draw = SVG().addTo('body')
     // .size(300, 300)
@@ -149,7 +150,9 @@ class Gantt {
             // console.log(userItem);
         });
     }
-
+    initResource(id, name) {
+        this.resource.set(id, name)
+    }
     test(id) {
         console.log("ssssss" + id);
     }
@@ -166,7 +169,8 @@ class Gantt {
         document.getElementById("task" + id).style['width'] = width;
         console.log("------2-----");
     }
-    addTask(id, name, start, finish) {
+    addTask(id, name, startDate, finishDate) {
+
 
 
         var tr = document.createElement("tr");
@@ -180,34 +184,60 @@ class Gantt {
         // 
         // task.appendChild(document.createTextNode("测试").getRootNode())
 
-        var start = document.createElement('input')
-        start.setAttribute("id", "start" + id)
-        start.setAttribute("type", "date")
-        start.setAttribute("value", start);
+        var start = document.createElement('input');
+        start.setAttribute("id", "start" + id);
+        start.setAttribute("type", "date");
+        start.setAttribute("min", "2022-01-01");
+        start.setAttribute("max", "2024-12-31");
+        start.setAttribute("pattern", "\d{4}-\d{2}-\d{2}")
+        start.setAttribute("value", startDate);
         // start.addEventListener("focus",  this.changeTask(id,'2022-12-28','2023-01-01'), true);
         // start.addEventListener("focus",  this.test, true);
         start.addEventListener("change", function () {
             this.changeTask(id);
+            var startDate = document.getElementById("start" + id).value;
+            var finishDate = document.getElementById("finish" + id).value;
+            var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000);
+            document.getElementById("duration" + id).value = day;
 
         }.bind(this), false);
 
         var finish = document.createElement('input')
         finish.setAttribute("id", "finish" + id)
         finish.setAttribute("type", "date")
-        finish.setAttribute("value", finish)
+        finish.setAttribute("min", "2022-01-01");
+        finish.setAttribute("max", "2024-12-31");
+        finish.setAttribute("pattern", "\d{4}-\d{2}-\d{2}")
+        finish.setAttribute("value", finishDate)
         finish.addEventListener("change", function (event) {
             // this.style.background = "pink";
             this.changeTask(id);
+            var startDate = document.getElementById("start" + id).value;
+            var finishDate = document.getElementById("finish" + id).value;
+            var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000);
+            document.getElementById("duration" + id).value = day;
         }.bind(this), true);
 
         var duration = document.createElement('input');
         duration.setAttribute("id", "duration" + id);
-        duration.setAttribute("value", "5")
-        duration.setAttribute("size", "2")
-        duration.addEventListener('click', function () {
-            // console.log(this); // 预期输出：'Data'
-            this.test(id);
+        var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000);
+        console.log(new Date(finishDate), new Date(startDate), (new Date(finishDate) - new Date(startDate)), (1 * 24 * 60 * 60 * 1000), day);
+        duration.setAttribute("value", day);
+        duration.setAttribute("size", "2");
+        duration.addEventListener('change', function () {
+            // this.test(id);
             this.changeTask(id)
+            var start = document.getElementById("start" + id).value;
+            var finish = document.getElementById("finish" + id).value;
+            var duration = document.getElementById("duration" + id).value;
+            console.log(start, finish);
+
+            var startDate = new Date(start);
+            var finishDate = new Date(startDate.setDate(startDate.getDate() + duration));
+            console.log(startDate, finishDate, duration);
+            var value = finishDate.getFullYear() + '-' + finishDate.getMonth() + '-' + finishDate.getDate();
+            console.log(value)
+            document.getElementById("finish" + id).value = value;
         }.bind(this));
 
         tr.appendChild(document.createElement('td').appendChild(task).getRootNode());
@@ -217,11 +247,15 @@ class Gantt {
 
         var resource = document.createElement('select')
         resource.setAttribute("id", "resource" + id);
-        var option = document.createElement("option");
-        option.setAttribute("value", "Neo");
-        option.appendChild(document.createTextNode("Volvo").getRootNode())
+        this.resource.forEach(function (value, key) {
+            // console.log(value, key)
+            var option = document.createElement("option");
+            option.setAttribute("value", key);
+            option.appendChild(document.createTextNode(value).getRootNode());
+            resource.appendChild(option);
 
-        resource.appendChild(option);
+        });
+
 
         tr.appendChild(document.createElement('td').appendChild(resource).getRootNode());;
         // th.appendChild(task);
@@ -234,7 +268,7 @@ class Gantt {
 
     }
 
-    // var form = document.getElementById("form");
+    // 
     // form.addEventListener("focus", function( event ) {
     //   event.target.style.background = "pink";
     // }, true);
