@@ -17,6 +17,8 @@ class Gantt {
     constructor(beginDate, endDate) {
         this.beginDate = beginDate;
         this.endDate = endDate;
+
+        this.ling = this.draw.defs().polygon('15,0 0,15 15,30 30,15').fill('black').stroke({ width: 1 })
     }
 
     getAllDay(start, end) {
@@ -120,22 +122,33 @@ class Gantt {
         group.add(this.draw.line(0, top + this.rowHeight, '100%', top + this.rowHeight).stroke('grey'));
         this.draw.add(group);
     }
-    addBar(id, start, finish) {
+    addBar(item) {
+        // console.log(item);
+        var id = item.id;
+        var start = item.start;
+        var finish = item.finish;
+        var milestone = item.milestone;
+
         var group = this.draw.group().attr({ 'name': 'task' });
         var x = this.datePosition.get(start);
         var width = this.datePosition.get(finish) - this.datePosition.get(start);
         // + this.columeWidth;
         // console.log(start, finish, x, x1)
 
-        group.add(this.draw.rect(width, this.barHeight).attr({ x: x, y: this.top + 5, fill: '#f06', 'id': 'task' + id, 'class': 'taskbar' }).click(function () {
-            //     this.stroke({ color: '#ffffff' })
-            moveProcess(id);
-        }))
+        if (milestone) {
+            var use = this.draw.use(this.ling).move(x, this.top)
+            group.add(use)
+        } else {
+            group.add(this.draw.rect(width, this.barHeight).attr({ x: x, y: this.top + 5, fill: '#f06', 'id': 'task' + id, 'class': 'taskbar' }).click(function () {
+                //     this.stroke({ color: '#ffffff' })
+                moveProcess(id);
+            }))
 
-        group.add(this.draw.rect(0, this.barHeight - 6).attr({ x: x, y: this.top + 8, fill: '#ffee00', 'id': 'process' + id, 'class': 'process' }).click(function () {
-            // this.fill({ color: '#ffffff' })
-            moveProcess(id);
-        }))
+            group.add(this.draw.rect(0, this.barHeight - 6).attr({ x: x, y: this.top + 8, fill: '#ffee00', 'id': 'process' + id, 'class': 'process' }).click(function () {
+                // this.fill({ color: '#ffffff' })
+                moveProcess(id);
+            }))
+        }
         group.add(this.draw.line(0, this.top + this.rowHeight, '100%', this.top + this.rowHeight).stroke('grey'));
         this.draw.add(group);
         this.top += this.rowHeight;
@@ -156,17 +169,17 @@ class Gantt {
     }
 
     changeTask(id) {
-        console.log("------1-----");
+        // console.log("------1-----");
         var start = document.getElementById("start" + id).value;
         var finish = document.getElementById("finish" + id).value;
-        console.log(start);
+        // console.log(start);
 
         var x = this.datePosition.get(start);
         var width = gantt.datePosition.get(finish) - this.datePosition.get(start);
-        console.log("x:", x)
+        // console.log("x:", x)
         document.getElementById("task" + id).style['x'] = x;
         document.getElementById("task" + id).style['width'] = width;
-        console.log("------2-----");
+        // console.log("------2-----");
     }
     addTask(id, name, startDate, finishDate, taskResource) {
 
@@ -342,7 +355,7 @@ class Gantt {
     }
     addTaskList(data) {
         // this.taskLists.set()
-        console.log(data);
+        // console.log(data);
         const predecessor = document.getElementById("predecessor");
 
         // var resource = document.createElement('datalist')

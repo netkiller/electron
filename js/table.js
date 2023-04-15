@@ -105,9 +105,7 @@ function save() {
   } else {
     milestone = false;
   }
-
-
-  console.log(milestone);
+  // console.log(milestone);
 
   $.ajax({
     method: 'POST',

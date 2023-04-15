@@ -196,23 +196,6 @@
   // gantt.initResource('Lisa', 'Lisa');
   // gantt.initResource('Anna', 'Anna');
 
-
-  // gantt.addBar(11, '2022-12-26', '2022-12-29');
-  // gantt.addBar(12, '2022-12-29', '2022-12-31')
-  // gantt.addBar(13, '2022-12-31', '2023-01-01')
-  // gantt.addBar(14, '2022-12-30', '2023-01-10');
-  // gantt.addBar(15, '2022-12-27', '2023-01-15');
-  // // 
-  // // 
-  // // var draw = SVG('#drawing')
-  // // group.rect(100, 100).animate().fill('#f03').move(100, 100)
-
-  // gantt.addTask(11, '测试', '2022-12-26', '2022-12-29');
-  // gantt.addTask(12, 'AAA', '2022-12-26', '2022-12-29');
-  // gantt.addTask(13, 'BBB', '2022-12-26', '2022-12-29');
-  // gantt.addTask(14, 'CCC', '2022-12-26', '2022-12-29');
-  // gantt.addTask(15, 'EEE', '2022-12-26', '2022-12-29');
-
   function addRow() {
     gantt.addTask();
     gantt.addBar()
@@ -224,13 +207,12 @@
     method: 'GET',
     dataType: 'json',
     success: function (data) {
-      console.log(data);
+      // console.log(data);
       $.each(data, function (index, item) {
         gantt.addTask(item.id, item.name, item.start, item.finish, item.resource);
-        gantt.addBar(item.id, item.start, item.finish);
+        gantt.addBar(item);
       });
       gantt.addTaskList(data);
-      // $('#list').html(html);
     },
     error: function (xhr, status, error) {
       console.log(error);
