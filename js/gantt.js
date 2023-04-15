@@ -9,6 +9,7 @@ class Gantt {
     endDate = '';
     datePosition = new Map();
     resource = new Map();
+    taskLists = new Map();
 
     // var draw = SVG().addTo('body')
     // .size(300, 300)
@@ -153,9 +154,7 @@ class Gantt {
     initResource(id, name) {
         this.resource.set(id, name)
     }
-    test(id) {
-        console.log("ssssss" + id);
-    }
+
     changeTask(id) {
         console.log("------1-----");
         var start = document.getElementById("start" + id).value;
@@ -169,9 +168,7 @@ class Gantt {
         document.getElementById("task" + id).style['width'] = width;
         console.log("------2-----");
     }
-    addTask(id, name, startDate, finishDate) {
-
-
+    addTask(id, name, startDate, finishDate, taskResource) {
 
         var tr = document.createElement("tr");
 
@@ -180,6 +177,27 @@ class Gantt {
         task.setAttribute("value", name);
         task.addEventListener("focus", function (event) {
             this.style.background = "pink";
+        }, true);
+        task.addEventListener("change", function (event) {
+            var id = parseInt(this.id.replace('name', ''));
+            var name = this.value;
+
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, name: name }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+
+
+            this.style.background = "white";
         }, true);
         // 
         // task.appendChild(document.createTextNode("测试").getRootNode())
@@ -200,6 +218,23 @@ class Gantt {
             var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000);
             document.getElementById("duration" + id).value = day;
 
+            var start = startDate;
+
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, start: start }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+
+
         }.bind(this), false);
 
         var finish = document.createElement('input')
@@ -216,12 +251,28 @@ class Gantt {
             var finishDate = document.getElementById("finish" + id).value;
             var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000);
             document.getElementById("duration" + id).value = day;
+
+            var finish = finishDate;
+
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, finish: finish }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
         }.bind(this), true);
 
         var duration = document.createElement('input');
         duration.setAttribute("id", "duration" + id);
         var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000);
-        console.log(new Date(finishDate), new Date(startDate), (new Date(finishDate) - new Date(startDate)), (1 * 24 * 60 * 60 * 1000), day);
+        // console.log(new Date(finishDate), new Date(startDate), (new Date(finishDate) - new Date(startDate)), (1 * 24 * 60 * 60 * 1000), day);
         duration.setAttribute("value", day);
         duration.setAttribute("size", "2");
         duration.addEventListener('change', function () {
@@ -233,10 +284,10 @@ class Gantt {
             console.log(start, finish);
 
             var startDate = new Date(start);
-            var finishDate = new Date(startDate.setDate(startDate.getDate() + duration));
-            console.log(startDate, finishDate, duration);
-            var value = finishDate.getFullYear() + '-' + finishDate.getMonth() + '-' + finishDate.getDate();
-            console.log(value)
+            var finishDate = new Date(startDate.setDate(startDate.getDate() + Number(duration)));
+            // console.log(startDate, finishDate, duration);
+            var value = finishDate.getFullYear() + '-' + finishDate.getMonth().toString().padStart(2, '0') + '-' + finishDate.getDate().toString().padStart(2, '0');
+            // console.log(value)
             document.getElementById("finish" + id).value = value;
         }.bind(this));
 
@@ -245,16 +296,38 @@ class Gantt {
         tr.appendChild(document.createElement('td').appendChild(finish).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(duration).getRootNode());
 
-        var resource = document.createElement('select')
-        resource.setAttribute("id", "resource" + id);
-        this.resource.forEach(function (value, key) {
-            // console.log(value, key)
-            var option = document.createElement("option");
-            option.setAttribute("value", key);
-            option.appendChild(document.createTextNode(value).getRootNode());
-            resource.appendChild(option);
+        // var resource = document.createElement('select')
+        // resource.setAttribute("id", "resource" + id);
+        // this.resource.forEach(function (value, key) {
+        //     // console.log(value, key)
+        //     var option = document.createElement("option");
+        //     option.setAttribute("value", key);
+        //     option.appendChild(document.createTextNode(value).getRootNode());
+        //     resource.appendChild(option);
 
-        });
+        // });
+        var resource = document.createElement('input');
+        resource.setAttribute("type", "text")
+        resource.setAttribute("id", "resource" + id)
+        resource.setAttribute("name", "resource" + id)
+        resource.setAttribute("value", taskResource)
+        resource.setAttribute("list", "resourceSuggestion")
+        resource.addEventListener("change", function (event) {
+            // this.style.background = "pink";
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, resource: this.value }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        }, true);
 
 
         tr.appendChild(document.createElement('td').appendChild(resource).getRootNode());;
@@ -267,8 +340,22 @@ class Gantt {
         // moveProcess(id)
 
     }
+    addTaskList(data) {
+        // this.taskLists.set()
+        console.log(data);
+        const predecessor = document.getElementById("predecessor");
 
-    // 
+        // var resource = document.createElement('datalist')
+        // resource.setAttribute("id", "taskLists");
+        data.forEach(function (value, key) {
+            console.log(value, key)
+            var option = document.createElement("option");
+            option.setAttribute("value", value.id);
+            option.appendChild(document.createTextNode(value.name).getRootNode());
+            predecessor.appendChild(option);
+        });
+    }
+
     // form.addEventListener("focus", function( event ) {
     //   event.target.style.background = "pink";
     // }, true);
@@ -276,6 +363,6 @@ class Gantt {
     //   event.target.style.background = "";
     // }, true);
 
-    // const el = document.getElementById("outside");
+    // 
     // el.addEventListener("click", () => { modifyText("four"); }, false);
 }

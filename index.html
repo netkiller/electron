@@ -9,6 +9,7 @@
   <title>Hello from Electron renderer!</title>
   <!-- <script type="text/javascript" xlink:href="svg/svg.min.js"></script> -->
   <script src="svg/svg.min.js"></script>
+  <script src="js/jquery-3.6.4.min.js"></script>
 
   <script>
     // run this function when the document is loaded
@@ -79,59 +80,138 @@
       cursor: e-resize;
     }
 
+    #main {
+      float: :left;
+    }
+
     #menu {
-      float: left;
+      float: unset;
       display: block;
     }
   </style>
 </head>
 
 <body>
-  <div>
+
+
+  <div id="main">
     <div id="title"></div>
     <div id="gantt">
       <div id="table"></div>
       <div id="chart"></div>
     </div>
   </div>
-  <div id="menu">
-    <button onclick="addRow()">添加</button>
-  </div>
 
+
+  <div id="menu">
+
+    <fieldset>
+      <legend>Choose your favorite monster</legend>
+      <!-- <form action="http://localhost:8080/project/save" method="POST" target="_blank" accept-charset="UTF-8" enctype="application/json" autocomplete="on" novalidate> -->
+      <label for="name">任务</label>
+      <input type="text" id="name" name="name" />
+      <label for="start">开始日期：</label>
+      <input type="date" id="start" name="start" min="2022-01-01" max="2025-12-31" />
+      <label for="finish">开始日期：</label>
+      <input type="date" id="finish" name="finish" min="2022-01-01" max="2025-12-31" />
+      <label for="duration">预计工时：</label>
+      <input type="number" name="duration" id="duration" min="1" max="31" step="1" />
+      <input type="range" name="duration1" id="duration1" min="1" max="31" step="1"
+        onchange="duration.value = this.value" />
+
+      <label for="resource">资源</label>
+      <input type="text" name="resource" id="resource" list="resourceSuggestion" value="Neo" />
+      <datalist id="resourceSuggestion">
+        <option>Apple</option>
+        <option>Banana</option>
+        <option>Blackberry</option>
+        <option>Blueberry</option>
+        <option>Lemon</option>
+        <option>Lychee</option>
+        <option>Peach</option>
+        <option>Pear</option>
+      </datalist>
+
+      <label for="milestone">里程碑：</label>
+      <input type="checkbox" id="milestone" name="milestone" value="true" />
+      <label for="predecessor">前置任务：</label>
+      <select name="predecessor" id="predecessor"></select>
+      <!-- <label for="parent">父任务：</label>
+        <select name="parent" id="parent" list="taskLists" value="" /> -->
+      <!-- <input type="submit" value="提交"> -->
+      <button onclick="addRow()">添加</button>
+      <button onclick="save()">提交</button>
+      <!-- </form> -->
+    </fieldset>
+  </div>
 </body>
+
+
 <script src="js/table.js"></script>
 <script src="js/gantt.js"></script>
 <script type="text/javascript">
   // <![CDATA[
 
   mouseStatus = true;
+
+
+  // $.getJSON(url, data, (data, status) => {
+  //   if (status === 200) {
+  //     //Do stuff with the JSON data
+  //   }
+  // });
+
+  // var gantt = null;
+
+  function GanttInit() {
+    var url = 'http://localhost:8080/project/init';
+    var gantt = null;
+    $.ajaxSettings.async = false;
+    $.getJSON(url, function (data) {
+
+      gantt = new Gantt(data.from, data.to)
+      gantt.calendar();
+      gantt.table();
+
+    });
+    return gantt;
+  }
+
+  const gantt = GanttInit()
+
   // gantt = new Gantt('2022-12-26','2023-04-05')
-  gantt = new Gantt('2022-12-26', '2023-01-15')
-  gantt.calendar();
-  gantt.table();
 
-  gantt.initResource('1','Neo');
-  gantt.initResource('2','Tom');
-  gantt.initResource('3','Jerry');
-  gantt.initResource('4','Lisa');
-  gantt.initResource('5','Anna');
+  $.ajaxSettings.async = false;
+  $.getJSON('http://localhost:8080/project/resource/lists', function (data) {
+    $.each(data, function (id, resource) {
+      gantt.initResource(resource, resource);
+    });
+  });
 
 
-  gantt.addBar(1, '2022-12-26', '2022-12-29');
-  gantt.addBar(2, '2022-12-29', '2022-12-31')
-  gantt.addBar(3, '2022-12-31', '2023-01-01')
-  gantt.addBar(4, '2022-12-30', '2023-01-10');
-  gantt.addBar(5, '2022-12-27', '2023-01-15');
-  // 
-  // 
-  // var draw = SVG('#drawing')
-  // group.rect(100, 100).animate().fill('#f03').move(100, 100)
 
-  gantt.addTask(1, '测试', '2022-12-26', '2022-12-29');
-  gantt.addTask(2, 'AAA', '2022-12-26', '2022-12-29');
-  gantt.addTask(3, 'BBB', '2022-12-26', '2022-12-29');
-  gantt.addTask(4, 'CCC', '2022-12-26', '2022-12-29');
-  gantt.addTask(5, 'EEE', '2022-12-26', '2022-12-29');
+  // gantt.initResource('Neo', 'Neo');
+  // gantt.initResource('Tom', 'Tom');
+  // gantt.initResource('Jerry', 'Jerry');
+  // gantt.initResource('Lisa', 'Lisa');
+  // gantt.initResource('Anna', 'Anna');
+
+
+  // gantt.addBar(11, '2022-12-26', '2022-12-29');
+  // gantt.addBar(12, '2022-12-29', '2022-12-31')
+  // gantt.addBar(13, '2022-12-31', '2023-01-01')
+  // gantt.addBar(14, '2022-12-30', '2023-01-10');
+  // gantt.addBar(15, '2022-12-27', '2023-01-15');
+  // // 
+  // // 
+  // // var draw = SVG('#drawing')
+  // // group.rect(100, 100).animate().fill('#f03').move(100, 100)
+
+  // gantt.addTask(11, '测试', '2022-12-26', '2022-12-29');
+  // gantt.addTask(12, 'AAA', '2022-12-26', '2022-12-29');
+  // gantt.addTask(13, 'BBB', '2022-12-26', '2022-12-29');
+  // gantt.addTask(14, 'CCC', '2022-12-26', '2022-12-29');
+  // gantt.addTask(15, 'EEE', '2022-12-26', '2022-12-29');
 
   function addRow() {
     gantt.addTask();
@@ -139,7 +219,23 @@
   }
 
 
-  
+  $.ajax({
+    url: 'http://localhost:8080/project/lists',
+    method: 'GET',
+    dataType: 'json',
+    success: function (data) {
+      console.log(data);
+      $.each(data, function (index, item) {
+        gantt.addTask(item.id, item.name, item.start, item.finish, item.resource);
+        gantt.addBar(item.id, item.start, item.finish);
+      });
+      gantt.addTaskList(data);
+      // $('#list').html(html);
+    },
+    error: function (xhr, status, error) {
+      console.log(error);
+    }
+  });
 
 
   // ]]>
