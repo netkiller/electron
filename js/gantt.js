@@ -9,7 +9,7 @@ class Gantt {
     endDate = '';
     datePosition = new Map();
     resource = new Map();
-    taskLists = new Map();
+    trailsPosition = new Map();
 
     // var draw = SVG().addTo('body')
     // .size(300, 300)
@@ -19,6 +19,9 @@ class Gantt {
         this.endDate = endDate;
 
         this.ling = this.draw.defs().polygon('15,0 0,15 15,30 30,15').fill('black').stroke({ width: 1 })
+        // this.arrow = this.draw.defs().marker(10, 10, function (add) {
+        //     add.path("M 0 0 L 10 5 L 0 10 z")
+        // })
     }
 
     getAllDay(start, end) {
@@ -80,8 +83,6 @@ class Gantt {
             colume += 1;
         });
 
-        // console.log(this.datePosition);
-
         group.add(this.draw.line(0, 30, '100%', 30).stroke('grey'))
         group.add(this.draw.line(0, 60, '100%', 60).stroke('grey'));
 
@@ -128,17 +129,32 @@ class Gantt {
         var start = item.start;
         var finish = item.finish;
         var milestone = item.milestone;
+        var parent = item.parent;
 
         var group = this.draw.group().attr({ 'name': 'task' });
         var x = this.datePosition.get(start);
         var width = this.datePosition.get(finish) - this.datePosition.get(start);
         // + this.columeWidth;
+        var position = new Map();
+        position.set('x', x);
+        position.set('y', this.top);
+        position.set('width', width);
+        this.trailsPosition.set(id, position)
         // console.log(start, finish, x, x1)
-
+        // console.log(parent)
         if (milestone) {
             var use = this.draw.use(this.ling).move(x, this.top)
             group.add(use)
-        } else {
+        }
+        else if (parent == true) {
+            // <path d="M 0 0 V 50 L 25 25 H 300 L 325 50 V 350 0" />
+            var y = parseInt(this.top);
+            var x = parseInt(x);
+            var width = x + width + 19;
+            var path = 'M ' + (x + 1) + ' ' + (y + 5) + ' V ' + (y + 25) + ' L ' + (x + 10) + ' ' + (y + 15) + ' H ' + (width) + ' L ' + (width + 10) + ' ' + (y + 25) + ' V ' + (y + 5) + ' H ' + (x);
+            group.add(this.draw.path(path).attr({ 'id': 'task' + id }))
+        }
+        else {
             group.add(this.draw.rect(width, this.barHeight).attr({ x: x, y: this.top + 5, fill: '#f06', 'id': 'task' + id, 'class': 'taskbar' }).click(function () {
                 //     this.stroke({ color: '#ffffff' })
                 moveProcess(id);
@@ -164,8 +180,17 @@ class Gantt {
             // console.log(userItem);
         });
     }
-    initResource(id, name) {
-        this.resource.set(id, name)
+    initResource(data) {
+        // this.resource.set(id, name)
+        // console.log(data)
+        var resource = document.getElementById('resourceSuggestion')
+        // resource.setAttribute("id", "resource" + id);
+        data.forEach(function (value) {
+            var option = document.createElement("option");
+            // option.setAttribute("value", value);
+            option.appendChild(document.createTextNode(value).getRootNode());
+            resource.appendChild(option);
+        });
     }
 
     changeTask(id) {
@@ -176,7 +201,7 @@ class Gantt {
 
         var x = this.datePosition.get(start);
         var width = gantt.datePosition.get(finish) - this.datePosition.get(start);
-        // console.log("x:", x)
+        console.log(start, finish, "x:", x, "width:", width)
         document.getElementById("task" + id).style['x'] = x;
         document.getElementById("task" + id).style['width'] = width;
         // console.log("------2-----");
@@ -288,13 +313,16 @@ class Gantt {
         // console.log(new Date(finishDate), new Date(startDate), (new Date(finishDate) - new Date(startDate)), (1 * 24 * 60 * 60 * 1000), day);
         duration.setAttribute("value", day);
         duration.setAttribute("size", "2");
+        duration.setAttribute("type", "number");
+        duration.setAttribute("min", "1");
+        duration.setAttribute("max", "31");
         duration.addEventListener('change', function () {
             // this.test(id);
             this.changeTask(id)
             var start = document.getElementById("start" + id).value;
             var finish = document.getElementById("finish" + id).value;
             var duration = document.getElementById("duration" + id).value;
-            console.log(start, finish);
+            // console.log(start, finish);
 
             var startDate = new Date(start);
             var finishDate = new Date(startDate.setDate(startDate.getDate() + Number(duration)));
@@ -309,22 +337,13 @@ class Gantt {
         tr.appendChild(document.createElement('td').appendChild(finish).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(duration).getRootNode());
 
-        // var resource = document.createElement('select')
-        // resource.setAttribute("id", "resource" + id);
-        // this.resource.forEach(function (value, key) {
-        //     // console.log(value, key)
-        //     var option = document.createElement("option");
-        //     option.setAttribute("value", key);
-        //     option.appendChild(document.createTextNode(value).getRootNode());
-        //     resource.appendChild(option);
-
-        // });
         var resource = document.createElement('input');
         resource.setAttribute("type", "text")
         resource.setAttribute("id", "resource" + id)
         resource.setAttribute("name", "resource" + id)
         resource.setAttribute("value", taskResource)
         resource.setAttribute("list", "resourceSuggestion")
+        resource.setAttribute("size", "10")
         resource.addEventListener("change", function (event) {
             // this.style.background = "pink";
             $.ajax({
@@ -345,30 +364,50 @@ class Gantt {
 
         tr.appendChild(document.createElement('td').appendChild(resource).getRootNode());;
         // th.appendChild(task);
-
         // document.body.appendChild(heading);
         document.getElementById("task").appendChild(tr);
-
-
-        // moveProcess(id)
-
     }
     addTaskList(data) {
         // this.taskLists.set()
         // console.log(data);
         const predecessor = document.getElementById("predecessor");
-
+        const parent = document.getElementById("parent");
         // var resource = document.createElement('datalist')
         // resource.setAttribute("id", "taskLists");
         data.forEach(function (value, key) {
-            console.log(value, key)
+            // console.log(value, key)
             var option = document.createElement("option");
             option.setAttribute("value", value.id);
             option.appendChild(document.createTextNode(value.name).getRootNode());
             predecessor.appendChild(option);
         });
-    }
+        data.forEach(function (value, key) {
+            // console.log(value, key)
+            var option = document.createElement("option");
+            option.setAttribute("value", value.id);
+            option.appendChild(document.createTextNode(value.name).getRootNode());
+            parent.appendChild(option);
+        });
 
+    }
+    linkPredecessor(id, predecessor) {
+        console.log(this.trailsPosition);
+        console.log(id, predecessor);
+        // var position = this.trailsPosition;
+
+
+        var parent = this.trailsPosition.get(predecessor)
+        var current = this.trailsPosition.get(id)
+        console.log(parent, current);
+
+
+        var polyline = this.draw.polyline([[parseInt(parent.get("x") + parent.get('width')), parseInt(parent.get("y") + 15)], [parseInt(current.get('x')+15), parseInt(parent.get('y') + 15)], [parseInt(current.get('x')+15), parseInt(current.get('y')-5)]]).fill('none').stroke('black').attr({ 'stroke-width': 1 }).marker('end', 10, 10, function (add) {
+            add.path("M 0 0 L 10 5 L 0 10 z");
+            // add.path("M 0 2 L 5 5 L 0 8 z");
+            
+        });
+        this.draw.add(polyline);
+    }
     // form.addEventListener("focus", function( event ) {
     //   event.target.style.background = "pink";
     // }, true);

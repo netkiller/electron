@@ -115,7 +115,9 @@ function save() {
       start: $("#start").val(),
       finish: $("#finish").val(),
       resource: $("#resource").val(),
-      milestone: milestone
+      predecessor: $("#predecessor").val(),
+      milestone: milestone,
+      project: { id: $("#parent").val() }
     }),
     dataType: 'json',
     contentType: 'application/json',

@@ -88,6 +88,11 @@
       float: unset;
       display: block;
     }
+
+    /* form */
+    #number {
+      width: 3em;
+    }
   </style>
 </head>
 
@@ -122,22 +127,18 @@
       <label for="resource">资源</label>
       <input type="text" name="resource" id="resource" list="resourceSuggestion" value="Neo" />
       <datalist id="resourceSuggestion">
-        <option>Apple</option>
-        <option>Banana</option>
-        <option>Blackberry</option>
-        <option>Blueberry</option>
-        <option>Lemon</option>
-        <option>Lychee</option>
-        <option>Peach</option>
-        <option>Pear</option>
+        <option></option>
       </datalist>
 
       <label for="milestone">里程碑：</label>
-      <input type="checkbox" id="milestone" name="milestone" value="true" />
+      <input type="checkbox" id="milestone" name="milestone" value="false" />
       <label for="predecessor">前置任务：</label>
       <select name="predecessor" id="predecessor"></select>
-      <!-- <label for="parent">父任务：</label>
-        <select name="parent" id="parent" list="taskLists" value="" /> -->
+      <label for="parent">父任务：</label>
+      <select name="parent" id="parent">
+        <option value="0">-- 无 --</option>
+
+      </select>
       <!-- <input type="submit" value="提交"> -->
       <button onclick="addRow()">添加</button>
       <button onclick="save()">提交</button>
@@ -183,18 +184,14 @@
 
   $.ajaxSettings.async = false;
   $.getJSON('http://localhost:8080/project/resource/lists', function (data) {
-    $.each(data, function (id, resource) {
-      gantt.initResource(resource, resource);
-    });
+    gantt.initResource(data);
+    // $.each(data, function (id, resource) {
+    // gantt.initResource(resource, resource);
+
+    // });
   });
 
 
-
-  // gantt.initResource('Neo', 'Neo');
-  // gantt.initResource('Tom', 'Tom');
-  // gantt.initResource('Jerry', 'Jerry');
-  // gantt.initResource('Lisa', 'Lisa');
-  // gantt.initResource('Anna', 'Anna');
 
   function addRow() {
     gantt.addTask();
@@ -207,12 +204,16 @@
     method: 'GET',
     dataType: 'json',
     success: function (data) {
-      // console.log(data);
+      console.log(data);
       $.each(data, function (index, item) {
         gantt.addTask(item.id, item.name, item.start, item.finish, item.resource);
         gantt.addBar(item);
+        if (item.predecessor != null) {
+          gantt.linkPredecessor(item.id, item.predecessor);
+        }
       });
       gantt.addTaskList(data);
+
     },
     error: function (xhr, status, error) {
       console.log(error);
