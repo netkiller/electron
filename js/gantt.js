@@ -155,7 +155,7 @@ class Gantt {
             group.add(this.draw.path(path).attr({ 'id': 'task' + id }))
         }
         else {
-            group.add(this.draw.rect(width, this.barHeight).attr({ x: x, y: this.top + 5, fill: '#f06', 'id': 'task' + id, 'class': 'taskbar' }).click(function () {
+            group.add(this.draw.rect(width + this.columeWidth-1, this.barHeight).attr({ x: x, y: this.top + 5, fill: '#f06', 'id': 'task' + id, 'class': 'taskbar' }).click(function () {
                 //     this.stroke({ color: '#ffffff' })
                 moveProcess(id);
             }))
@@ -193,19 +193,6 @@ class Gantt {
         });
     }
 
-    changeTask(id) {
-        // console.log("------1-----");
-        var start = document.getElementById("start" + id).value;
-        var finish = document.getElementById("finish" + id).value;
-        // console.log(start);
-
-        var x = this.datePosition.get(start);
-        var width = gantt.datePosition.get(finish) - this.datePosition.get(start);
-        console.log(start, finish, "x:", x, "width:", width)
-        document.getElementById("task" + id).style['x'] = x;
-        document.getElementById("task" + id).style['width'] = width;
-        // console.log("------2-----");
-    }
     addTask(id, name, startDate, finishDate, taskResource) {
 
         var tr = document.createElement("tr");
@@ -367,6 +354,20 @@ class Gantt {
         // document.body.appendChild(heading);
         document.getElementById("task").appendChild(tr);
     }
+    changeTask(id) {
+        // console.log("------1-----");
+        var start = document.getElementById("start" + id).value;
+        var finish = document.getElementById("finish" + id).value;
+        console.log(start,finish);
+
+        var x = this.datePosition.get(start);
+        var width = this.datePosition.get(finish) - this.datePosition.get(start);
+        console.log(start, finish, "x:", x, "width:", width)
+        var task = document.getElementById("task" + id);
+        task.setAttribute("x", x);
+        task.style['width'] = width+this.columeWidth-1;
+        // console.log("------2-----");
+    }
     addTaskList(data) {
         // this.taskLists.set()
         // console.log(data);
@@ -401,10 +402,10 @@ class Gantt {
         console.log(parent, current);
 
 
-        var polyline = this.draw.polyline([[parseInt(parent.get("x") + parent.get('width')), parseInt(parent.get("y") + 15)], [parseInt(current.get('x')+15), parseInt(parent.get('y') + 15)], [parseInt(current.get('x')+15), parseInt(current.get('y')-5)]]).fill('none').stroke('black').attr({ 'stroke-width': 1 }).marker('end', 10, 10, function (add) {
+        var polyline = this.draw.polyline([[parseInt(parent.get("x") + parent.get('width')+ this.columeWidth), parseInt(parent.get("y") + 15)], [parseInt(current.get('x') + 15), parseInt(parent.get('y') + 15)], [parseInt(current.get('x') + 15), parseInt(current.get('y') - 5)]]).fill('none').stroke('black').attr({ 'stroke-width': 1 }).marker('end', 10, 10, function (add) {
             add.path("M 0 0 L 10 5 L 0 10 z");
             // add.path("M 0 2 L 5 5 L 0 8 z");
-            
+
         });
         this.draw.add(polyline);
     }
