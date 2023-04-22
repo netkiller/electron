@@ -61,7 +61,7 @@
     }
 
     table caption {
-      height: 28px;
+      height: 60px;
     }
 
     table thead th {
@@ -116,9 +116,9 @@
       <label for="name">任务</label>
       <input type="text" id="name" name="name" />
       <label for="start">开始日期：</label>
-      <input type="date" id="start" name="start" min="2022-01-01" max="2025-12-31" />
+      <input type="date" id="start" name="start" min="2022-01-01" max="2025-12-31" required />
       <label for="finish">开始日期：</label>
-      <input type="date" id="finish" name="finish" min="2022-01-01" max="2025-12-31" />
+      <input type="date" id="finish" name="finish" min="2022-01-01" max="2025-12-31" required />
       <label for="duration">预计工时：</label>
       <input type="number" name="duration" id="duration" min="1" max="31" step="1" />
       <input type="range" name="duration1" id="duration1" min="1" max="31" step="1"
@@ -133,11 +133,12 @@
       <label for="milestone">里程碑：</label>
       <input type="checkbox" id="milestone" name="milestone" value="false" />
       <label for="predecessor">前置任务：</label>
-      <select name="predecessor" id="predecessor"></select>
+      <select name="predecessor" id="predecessor">
+        <option value="0">-- 无 --</option>
+      </select>
       <label for="parent">父任务：</label>
       <select name="parent" id="parent">
         <option value="0">-- 无 --</option>
-
       </select>
       <!-- <input type="submit" value="提交"> -->
       <button onclick="addRow()">添加</button>
@@ -154,15 +155,6 @@
   // <![CDATA[
 
   mouseStatus = true;
-
-
-  // $.getJSON(url, data, (data, status) => {
-  //   if (status === 200) {
-  //     //Do stuff with the JSON data
-  //   }
-  // });
-
-  // var gantt = null;
 
   function GanttInit() {
     var url = 'http://localhost:8080/project/init';
@@ -204,7 +196,7 @@
     method: 'GET',
     dataType: 'json',
     success: function (data) {
-      console.log(data);
+      // console.log(data);
       $.each(data, function (index, item) {
         gantt.addTask(item.id, item.name, item.start, item.finish, item.resource);
         gantt.addBar(item);
@@ -220,6 +212,26 @@
     }
   });
 
+  var date = new Date();
+
+  /* 从日期中获取年月日部分 */
+  // var year = date.toLocaleString("default", { year: "numeric" });
+  // var month = date.toLocaleString("default", { month: "2-digit" });
+  // var day = date.toLocaleString("default", { day: "2-digit" });
+  var day = ("0" + date.getDate()).slice(-2);
+  /*格式化月，如果小于9，则补0*/
+  var month = ("0" + (date.getMonth() + 1)).slice(-2);
+
+  /* 生成 yyyy-mm-dd 日期字符串 */
+  var today = date.getFullYear() + "-" + month + "-" + day;
+  var day = ("0" + (date.getDate() + 1)).slice(-2);
+  var tomorrow = date.getFullYear() + "-" + month + "-" + day;
+  console.log(tomorrow);
+
+  const start = document.getElementById("start");
+  start.value = today;
+  const finish = document.getElementById("finish");
+  finish.value = tomorrow;
 
   // ]]>
 </script>

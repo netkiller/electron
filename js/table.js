@@ -123,6 +123,7 @@ function save() {
     contentType: 'application/json',
     success: function (data) {
       console.log(data);
+      location.reload();
     },
     error: function (xhr, status, error) {
       console.log(error);

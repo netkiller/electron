@@ -4,15 +4,13 @@ class Gantt {
     barHeight = 20
     rowHeight = 30
     vline = 0
-    top = 60
+    top = 90
     beginDate = '';
     endDate = '';
     datePosition = new Map();
     resource = new Map();
     trailsPosition = new Map();
 
-    // var draw = SVG().addTo('body')
-    // .size(300, 300)
     draw = SVG().addTo('#chart').size(31 * this.columeWidth, this.height).attr({ 'id': 'svg' });
     constructor(beginDate, endDate) {
         this.beginDate = beginDate;
@@ -61,30 +59,43 @@ class Gantt {
             var x = this.columeWidth * (colume) + this.vline;
             this.datePosition.set(date, x)
             // var week = new Date('2023-03-' + day.toString().padStart(2, '0')).getDay();
+            if (day == 1) {
+                group.add(this.draw.line(x, 0, x, "100%").stroke('black'));
+                group.add(this.draw.text(date).attr({ x: x + 6, y: 20, "text-anchor": "start", "dominant_baseline": 'hanging' }));
+            }
             var week = new Date(date).getDay();
             if (week == 0 || week == 6) {
-                var rect = this.draw.rect(this.columeWidth, 100).attr({ x: x, y: this.rowHeight, fill: '#eeeeee' });
+                var rect = this.draw.rect(this.columeWidth, 100).attr({ x: x, y: this.rowHeight * 2, fill: '#eeeeee' });
                 rect.add(SVG('<title>' + date + '</title>'))
             } else {
-                var rect = this.draw.rect(this.columeWidth, 100).attr({ x: x, y: this.rowHeight, fill: '#dddddd' });
+                var rect = this.draw.rect(this.columeWidth, 100).attr({ x: x, y: this.rowHeight * 2, fill: '#dddddd' });
                 rect.add(SVG('<title>' + date + '</title>'))
             }
             group.add(rect);
 
             if (week == 0) {
-                group.add(this.draw.line(x + this.columeWidth, 0, x + this.columeWidth, this.rowHeight).stroke('grey'));
+                group.add(this.draw.line(x + this.columeWidth + 1, this.rowHeight, x + this.columeWidth + 1, "100%").stroke('#555555'));
             }
 
-            var text = this.draw.text(weeks[week]).attr({ x: x + 5, y: 20, "text-anchor": "start", "dominant_baseline": 'hanging' });
+            var text = this.draw.text(weeks[week]).attr({ x: x + 6, y: 20 + this.rowHeight, "text-anchor": "start", "dominant_baseline": 'hanging' });
             group.add(text);
-            text = this.draw.text(day).attr({ x: x, y: 53, "font-size": 20 });
+            var xOffset = 5;
+            if (day < 10) {
+                xOffset = 10;
+            }
+            text = this.draw.text(day).attr({ x: x + xOffset, y: 53 + this.rowHeight, "font-size": 20 });
             group.add(text);
             this.vline += 1;
             colume += 1;
         });
 
+        group.add(this.draw.line(0, 0, '100%', 0).stroke('grey'));
         group.add(this.draw.line(0, 30, '100%', 30).stroke('grey'))
         group.add(this.draw.line(0, 60, '100%', 60).stroke('grey'));
+        group.add(this.draw.line(0, 90, '100%', 90).stroke('grey'));
+
+        group.add(this.draw.line(1, 0, 1, "100%").stroke('grey'));
+        group.add(this.draw.line("100%", 0, "100%", "100%").stroke('grey'));
 
         this.draw.add(group);
     }
@@ -117,10 +128,9 @@ class Gantt {
     }
 
     task() {
-        var top = 60
         var group = this.draw.group().attr({ 'id': 'task' });
-        group.add(this.draw.rect((this.columeWidth + this.vline) * 3, this.barHeight).attr({ x: 0, y: top + 5, fill: '#000011' }))
-        group.add(this.draw.line(0, top + this.rowHeight, '100%', top + this.rowHeight).stroke('grey'));
+        group.add(this.draw.rect((this.columeWidth + this.vline) * 3, this.barHeight).attr({ x: 0, y: this.top + 5, fill: '#000011' }))
+        group.add(this.draw.line(0, this.top + this.rowHeight, '100%', this.top + this.rowHeight).stroke('grey'));
         this.draw.add(group);
     }
     addBar(item) {
@@ -155,7 +165,7 @@ class Gantt {
             group.add(this.draw.path(path).attr({ 'id': 'task' + id }))
         }
         else {
-            group.add(this.draw.rect(width + this.columeWidth-1, this.barHeight).attr({ x: x, y: this.top + 5, fill: '#f06', 'id': 'task' + id, 'class': 'taskbar' }).click(function () {
+            group.add(this.draw.rect(width + this.columeWidth - 1, this.barHeight).attr({ x: x, y: this.top + 5, fill: '#f06', 'id': 'task' + id, 'class': 'taskbar' }).click(function () {
                 //     this.stroke({ color: '#ffffff' })
                 moveProcess(id);
             }))
@@ -259,6 +269,13 @@ class Gantt {
                 }
             });
 
+            $.getJSON('http://localhost:8080/project/get/' + id, function (data) {
+                console.log(data.id, data.predecessor)
+                // $.each(data, function (id, resource) {
+                // gantt.initResource(resource, resource);
+                this.linkPredecessor(data.id, data.predecessor);
+                // });
+            }.bind(this));
 
         }.bind(this), false);
 
@@ -292,11 +309,18 @@ class Gantt {
                     console.log(error);
                 }
             });
+            $.getJSON('http://localhost:8080/project/get/next/' + id, function (data) {
+                // console.log(data);
+                $.each(data, function (id, item) {
+                    // console.log(item.id, item.predecessor)
+                    this.linkPredecessor(item.id, item.predecessor);
+                }.bind(this));
+            }.bind(this));
         }.bind(this), true);
 
         var duration = document.createElement('input');
         duration.setAttribute("id", "duration" + id);
-        var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000);
+        var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000) + 1;
         // console.log(new Date(finishDate), new Date(startDate), (new Date(finishDate) - new Date(startDate)), (1 * 24 * 60 * 60 * 1000), day);
         duration.setAttribute("value", day);
         duration.setAttribute("size", "2");
@@ -304,19 +328,30 @@ class Gantt {
         duration.setAttribute("min", "1");
         duration.setAttribute("max", "31");
         duration.addEventListener('change', function () {
-            // this.test(id);
-            this.changeTask(id)
+
             var start = document.getElementById("start" + id).value;
-            var finish = document.getElementById("finish" + id).value;
+            // var finish = document.getElementById("finish" + id).value;
             var duration = document.getElementById("duration" + id).value;
             // console.log(start, finish);
 
-            var startDate = new Date(start);
-            var finishDate = new Date(startDate.setDate(startDate.getDate() + Number(duration)));
-            // console.log(startDate, finishDate, duration);
-            var value = finishDate.getFullYear() + '-' + finishDate.getMonth().toString().padStart(2, '0') + '-' + finishDate.getDate().toString().padStart(2, '0');
-            // console.log(value)
+            var finishDate = new Date(start);
+            finishDate.setDate(finishDate.getDate() + Number(duration-1));
+            // finish = new Date(finishDate.setDate(finishDate.getDate() + Number(duration)));
+            // console.log(start, finishDate.getMonth(), finish, duration);
+            var month = finishDate.getMonth() + 1
+            var value = finishDate.getFullYear() + '-' + month.toString().padStart(2, '0') + '-' + finishDate.getDate().toString().padStart(2, '0');
+            console.log(value)
             document.getElementById("finish" + id).value = value;
+            this.changeTask(id)
+
+            $.getJSON('http://localhost:8080/project/get/next/' + id, function (data) {
+                // console.log(data);
+                $.each(data, function (id, item) {
+                    // console.log(item.id, item.predecessor)
+                    this.linkPredecessor(item.id, item.predecessor);
+                }.bind(this));
+            }.bind(this));
+
         }.bind(this));
 
         tr.appendChild(document.createElement('td').appendChild(task).getRootNode());
@@ -355,17 +390,21 @@ class Gantt {
         document.getElementById("task").appendChild(tr);
     }
     changeTask(id) {
-        // console.log("------1-----");
         var start = document.getElementById("start" + id).value;
         var finish = document.getElementById("finish" + id).value;
-        console.log(start,finish);
-
+        // console.log(start,finish);
         var x = this.datePosition.get(start);
         var width = this.datePosition.get(finish) - this.datePosition.get(start);
-        console.log(start, finish, "x:", x, "width:", width)
+        // console.log(start, finish, "x:", x, "width:", width)
         var task = document.getElementById("task" + id);
         task.setAttribute("x", x);
-        task.style['width'] = width+this.columeWidth-1;
+        task.style['width'] = width + this.columeWidth - 1;
+
+        var position = this.trailsPosition.get(id);
+        // console.log(position);
+        position.set('x', x);
+        position.set('width', width);
+        this.trailsPosition.set(id, position);
         // console.log("------2-----");
     }
     addTaskList(data) {
@@ -392,22 +431,23 @@ class Gantt {
 
     }
     linkPredecessor(id, predecessor) {
-        console.log(this.trailsPosition);
-        console.log(id, predecessor);
+        // console.log(this.trailsPosition);
+        // console.log(id, predecessor);
         // var position = this.trailsPosition;
-
 
         var parent = this.trailsPosition.get(predecessor)
         var current = this.trailsPosition.get(id)
-        console.log(parent, current);
+        // console.log(parent, current);
 
+        if (parent) {
+            $("#predecessor" + id).remove();
+            var polyline = this.draw.polyline([[parseInt(parent.get("x") + parent.get('width') + this.columeWidth), parseInt(parent.get("y") + 15)], [parseInt(current.get('x') + 15), parseInt(parent.get('y') + 15)], [parseInt(current.get('x') + 15), parseInt(current.get('y') - 5)]]).fill('none').stroke('black').attr({ 'id': 'predecessor' + id, 'stroke-width': 1 }).marker('end', 10, 10, function (add) {
+                add.path("M 0 0 L 10 5 L 0 10 z");
+                // add.path("M 0 2 L 5 5 L 0 8 z");
 
-        var polyline = this.draw.polyline([[parseInt(parent.get("x") + parent.get('width')+ this.columeWidth), parseInt(parent.get("y") + 15)], [parseInt(current.get('x') + 15), parseInt(parent.get('y') + 15)], [parseInt(current.get('x') + 15), parseInt(current.get('y') - 5)]]).fill('none').stroke('black').attr({ 'stroke-width': 1 }).marker('end', 10, 10, function (add) {
-            add.path("M 0 0 L 10 5 L 0 10 z");
-            // add.path("M 0 2 L 5 5 L 0 8 z");
-
-        });
-        this.draw.add(polyline);
+            });
+            this.draw.add(polyline);
+        }
     }
     // form.addEventListener("focus", function( event ) {
     //   event.target.style.background = "pink";
