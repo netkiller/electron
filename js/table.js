@@ -1,5 +1,3 @@
-
-
 function moveProcess(id) {
   var mouseStatus = false;
   // var svg = document.getElementById("svg");

@@ -196,10 +196,14 @@
     method: 'GET',
     dataType: 'json',
     success: function (data) {
-      // console.log(data);
+
+      gantt.initTasks(data);
       $.each(data, function (index, item) {
-        gantt.addTask(item.id, item.name, item.start, item.finish, item.resource);
+        gantt.addTask(item);
         gantt.addBar(item);
+      });
+      gantt.done();
+      $.each(data, function (index, item) {
         if (item.predecessor != null) {
           gantt.linkPredecessor(item.id, item.predecessor);
         }

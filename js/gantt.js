@@ -10,16 +10,21 @@ class Gantt {
     datePosition = new Map();
     resource = new Map();
     trailsPosition = new Map();
+    tasks = [];
 
     draw = SVG().addTo('#chart').size(31 * this.columeWidth, this.height).attr({ 'id': 'svg' });
     constructor(beginDate, endDate) {
         this.beginDate = beginDate;
         this.endDate = endDate;
-
+        this.drawPredecessorGroup = this.draw.group().attr({ 'id': 'predecessorGroup' });
         this.ling = this.draw.defs().polygon('15,0 0,15 15,30 30,15').fill('black').stroke({ width: 1 })
         // this.arrow = this.draw.defs().marker(10, 10, function (add) {
         //     add.path("M 0 0 L 10 5 L 0 10 z")
         // })
+    }
+    initTasks(tasks) {
+        // console.log(tasks);
+        this.tasks = tasks;
     }
 
     getAllDay(start, end) {
@@ -114,6 +119,8 @@ class Gantt {
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("完成时间")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("工时")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("资源")).getRootNode());
+        tr.appendChild(document.createElement('th').appendChild(document.createTextNode("前置任务")).getRootNode());
+        tr.appendChild(document.createElement('th').appendChild(document.createTextNode("父任务")).getRootNode());
 
         thead.appendChild(tr);
         table.appendChild(thead);
@@ -126,7 +133,9 @@ class Gantt {
 
         document.getElementById("table").appendChild(table);
     }
-
+    done() {
+        this.draw.add(this.drawPredecessorGroup);
+    }
     task() {
         var group = this.draw.group().attr({ 'id': 'task' });
         group.add(this.draw.rect((this.columeWidth + this.vline) * 3, this.barHeight).attr({ x: 0, y: this.top + 5, fill: '#000011' }))
@@ -153,7 +162,7 @@ class Gantt {
         // console.log(start, finish, x, x1)
         // console.log(parent)
         if (milestone) {
-            var use = this.draw.use(this.ling).move(x, this.top)
+            var use = this.draw.use(this.ling).move(x, this.top).attr({ 'id': 'task' + id })
             group.add(use)
         }
         else if (parent == true) {
@@ -203,13 +212,19 @@ class Gantt {
         });
     }
 
-    addTask(id, name, startDate, finishDate, taskResource) {
+    addTask(item) {
+
+        var id = item.id;
+        var name = item.name;
+        // var start = item.start;
+        // var finish = item.finish;
+        // var resource = item.resource;
 
         var tr = document.createElement("tr");
 
         var task = document.createElement('input');
         task.setAttribute("id", "name" + id);
-        task.setAttribute("value", name);
+        task.setAttribute("value", item.name);
         task.addEventListener("focus", function (event) {
             this.style.background = "pink";
         }, true);
@@ -243,7 +258,7 @@ class Gantt {
         start.setAttribute("min", "2022-01-01");
         start.setAttribute("max", "2024-12-31");
         start.setAttribute("pattern", "\d{4}-\d{2}-\d{2}")
-        start.setAttribute("value", startDate);
+        start.setAttribute("value", item.start);
         // start.addEventListener("focus",  this.changeTask(id,'2022-12-28','2023-01-01'), true);
         // start.addEventListener("focus",  this.test, true);
         start.addEventListener("change", function () {
@@ -270,11 +285,8 @@ class Gantt {
             });
 
             $.getJSON('http://localhost:8080/project/get/' + id, function (data) {
-                console.log(data.id, data.predecessor)
-                // $.each(data, function (id, resource) {
-                // gantt.initResource(resource, resource);
+                // console.log(data.id, data.predecessor)
                 this.linkPredecessor(data.id, data.predecessor);
-                // });
             }.bind(this));
 
         }.bind(this), false);
@@ -285,7 +297,7 @@ class Gantt {
         finish.setAttribute("min", "2022-01-01");
         finish.setAttribute("max", "2024-12-31");
         finish.setAttribute("pattern", "\d{4}-\d{2}-\d{2}")
-        finish.setAttribute("value", finishDate)
+        finish.setAttribute("value", item.finish)
         finish.addEventListener("change", function (event) {
             // this.style.background = "pink";
             this.changeTask(id);
@@ -320,7 +332,7 @@ class Gantt {
 
         var duration = document.createElement('input');
         duration.setAttribute("id", "duration" + id);
-        var day = (new Date(finishDate) - new Date(startDate)) / (1 * 24 * 60 * 60 * 1000) + 1;
+        var day = (new Date(item.finish) - new Date(item.start)) / (1 * 24 * 60 * 60 * 1000) + 1;
         // console.log(new Date(finishDate), new Date(startDate), (new Date(finishDate) - new Date(startDate)), (1 * 24 * 60 * 60 * 1000), day);
         duration.setAttribute("value", day);
         duration.setAttribute("size", "2");
@@ -330,12 +342,11 @@ class Gantt {
         duration.addEventListener('change', function () {
 
             var start = document.getElementById("start" + id).value;
-            // var finish = document.getElementById("finish" + id).value;
             var duration = document.getElementById("duration" + id).value;
             // console.log(start, finish);
 
             var finishDate = new Date(start);
-            finishDate.setDate(finishDate.getDate() + Number(duration-1));
+            finishDate.setDate(finishDate.getDate() + Number(duration - 1));
             // finish = new Date(finishDate.setDate(finishDate.getDate() + Number(duration)));
             // console.log(start, finishDate.getMonth(), finish, duration);
             var month = finishDate.getMonth() + 1
@@ -343,6 +354,21 @@ class Gantt {
             console.log(value)
             document.getElementById("finish" + id).value = value;
             this.changeTask(id)
+
+            var finish = document.getElementById("finish" + id).value;
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, finish: finish }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
 
             $.getJSON('http://localhost:8080/project/get/next/' + id, function (data) {
                 // console.log(data);
@@ -354,16 +380,11 @@ class Gantt {
 
         }.bind(this));
 
-        tr.appendChild(document.createElement('td').appendChild(task).getRootNode());
-        tr.appendChild(document.createElement('td').appendChild(start).getRootNode());
-        tr.appendChild(document.createElement('td').appendChild(finish).getRootNode());
-        tr.appendChild(document.createElement('td').appendChild(duration).getRootNode());
-
         var resource = document.createElement('input');
         resource.setAttribute("type", "text")
         resource.setAttribute("id", "resource" + id)
         resource.setAttribute("name", "resource" + id)
-        resource.setAttribute("value", taskResource)
+        resource.setAttribute("value", item.resource)
         resource.setAttribute("list", "resourceSuggestion")
         resource.setAttribute("size", "10")
         resource.addEventListener("change", function (event) {
@@ -382,9 +403,97 @@ class Gantt {
                 }
             });
         }, true);
+        // console.log(item)
+        var predecessor = document.createElement('select');
+        predecessor.setAttribute("id", "predecessor" + id)
+        predecessor.setAttribute("name", "predecessor" + id)
+        var option = document.createElement("option");
+        option.setAttribute("value", "null");
+        option.appendChild(document.createTextNode("-- 无 --").getRootNode());
+        predecessor.appendChild(option);
+        this.tasks.forEach(function (value, key) {
+            var option = document.createElement("option");
+            option.setAttribute("value", value.id);
+            if (item.predecessor != null && item.predecessor == value.id) {
+                // console.log("predecessor:", item.predecessor, value.id)
+                option.setAttribute("selected", true);
+            }
 
+            option.appendChild(document.createTextNode(value.name).getRootNode());
+            predecessor.appendChild(option);
+        });
 
+        // predecessor.addEventListener("click", function (event) {
+        // $.getJSON('http://localhost:8080/project/option/lists', function (data) {
+        //     // console.log(data);
+        //     $.each(data, function (id, item) {
+        //         console.log(id, item)
+        //         var option = document.createElement("option");
+        //         option.setAttribute("value", item[0]);
+        //         option.appendChild(document.createTextNode(item[1]).getRootNode());
+        //         predecessor.appendChild(option);
+        //     }.bind(predecessor));
+        // }.bind(this));
+        // }, true);
+        predecessor.addEventListener("change", function (event) {
+            //     // this.style.background = "pink";
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, predecessor: this.value }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        }, true);
+
+        var parent = document.createElement('select');
+        parent.setAttribute("id", "parent" + id)
+        parent.setAttribute("name", "parent" + id)
+        var option = document.createElement("option");
+        option.setAttribute("value", "null");
+        option.appendChild(document.createTextNode("-- 无 --").getRootNode());
+        parent.appendChild(option);
+        this.tasks.forEach(function (value, key) {
+            var option = document.createElement("option");
+            option.setAttribute("value", value.id);
+            if (item.project != null && item.project.id == value.id) {
+                // console.log("predecessor:", item.project.id, value.id)
+                option.setAttribute("selected", true);
+            }
+
+            option.appendChild(document.createTextNode(value.name).getRootNode());
+            parent.appendChild(option);
+        });
+        parent.addEventListener("change", function (event) {
+            //     // this.style.background = "pink";
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, project: { id: this.value } }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        }, true);
+
+        tr.appendChild(document.createElement('td').appendChild(task).getRootNode());
+        tr.appendChild(document.createElement('td').appendChild(start).getRootNode());
+        tr.appendChild(document.createElement('td').appendChild(finish).getRootNode());
+        tr.appendChild(document.createElement('td').appendChild(duration).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(resource).getRootNode());;
+        tr.appendChild(document.createElement('td').appendChild(predecessor).getRootNode());;
+        tr.appendChild(document.createElement('td').appendChild(parent).getRootNode());;
         // th.appendChild(task);
         // document.body.appendChild(heading);
         document.getElementById("task").appendChild(tr);
@@ -440,13 +549,13 @@ class Gantt {
         // console.log(parent, current);
 
         if (parent) {
-            $("#predecessor" + id).remove();
-            var polyline = this.draw.polyline([[parseInt(parent.get("x") + parent.get('width') + this.columeWidth), parseInt(parent.get("y") + 15)], [parseInt(current.get('x') + 15), parseInt(parent.get('y') + 15)], [parseInt(current.get('x') + 15), parseInt(current.get('y') - 5)]]).fill('none').stroke('black').attr({ 'id': 'predecessor' + id, 'stroke-width': 1 }).marker('end', 10, 10, function (add) {
+            $("#linkPredecessor" + id).remove();
+            var polyline = this.draw.polyline([[parseInt(parent.get("x") + parent.get('width') + this.columeWidth), parseInt(parent.get("y") + 15)], [parseInt(current.get('x') + 15), parseInt(parent.get('y') + 15)], [parseInt(current.get('x') + 15), parseInt(current.get('y') - 5)]]).fill('none').stroke('black').attr({ 'id': 'linkPredecessor' + id, 'stroke-width': 1 }).marker('end', 10, 10, function (add) {
                 add.path("M 0 0 L 10 5 L 0 10 z");
                 // add.path("M 0 2 L 5 5 L 0 8 z");
 
             });
-            this.draw.add(polyline);
+            this.drawPredecessorGroup.add(polyline);
         }
     }
     // form.addEventListener("focus", function( event ) {
