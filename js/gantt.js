@@ -351,7 +351,7 @@ class Gantt {
             // console.log(start, finishDate.getMonth(), finish, duration);
             var month = finishDate.getMonth() + 1
             var value = finishDate.getFullYear() + '-' + month.toString().padStart(2, '0') + '-' + finishDate.getDate().toString().padStart(2, '0');
-            console.log(value)
+            // console.log(value)
             document.getElementById("finish" + id).value = value;
             this.changeTask(id)
 
@@ -408,7 +408,7 @@ class Gantt {
         predecessor.setAttribute("id", "predecessor" + id)
         predecessor.setAttribute("name", "predecessor" + id)
         var option = document.createElement("option");
-        option.setAttribute("value", "null");
+        option.setAttribute("value", "0");
         option.appendChild(document.createTextNode("-- 无 --").getRootNode());
         predecessor.appendChild(option);
         this.tasks.forEach(function (value, key) {
@@ -447,7 +447,7 @@ class Gantt {
         parent.setAttribute("id", "parent" + id)
         parent.setAttribute("name", "parent" + id)
         var option = document.createElement("option");
-        option.setAttribute("value", "null");
+        option.setAttribute("value", "0");
         option.appendChild(document.createTextNode("-- 无 --").getRootNode());
         parent.appendChild(option);
         this.tasks.forEach(function (value, key) {
@@ -478,13 +478,45 @@ class Gantt {
             });
         }, true);
 
+        var milestone = document.createElement('input');
+        milestone.setAttribute("type", "checkbox");
+        milestone.setAttribute("id", "milestone" + id);
+        if (item.milestone) {
+            milestone.setAttribute("checked", "checked");
+        }
+        // milestone.addEventListener("focus", function (event) {
+        //     this.style.background = "pink";
+        // }, true);
+        milestone.addEventListener("change", function (event) {
+            var id = parseInt(this.id.replace('milestone', ''));
+            var status = this.checked;
+
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, milestone: status }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+
+
+            this.style.background = "white";
+        }, true);
+
         tr.appendChild(document.createElement('td').appendChild(task).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(start).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(finish).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(duration).getRootNode());
-        tr.appendChild(document.createElement('td').appendChild(resource).getRootNode());;
-        tr.appendChild(document.createElement('td').appendChild(predecessor).getRootNode());;
-        tr.appendChild(document.createElement('td').appendChild(parent).getRootNode());;
+        tr.appendChild(document.createElement('td').appendChild(resource).getRootNode());
+        tr.appendChild(document.createElement('td').appendChild(predecessor).getRootNode());
+        tr.appendChild(document.createElement('td').appendChild(parent).getRootNode());
+        tr.appendChild(document.createElement('td').appendChild(milestone).getRootNode());
         // th.appendChild(task);
         // document.body.appendChild(heading);
         document.getElementById("task").appendChild(tr);
