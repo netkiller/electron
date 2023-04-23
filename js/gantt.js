@@ -107,7 +107,7 @@ class Gantt {
 
     table() {
         var table = document.createElement("table");
-        // table.setAttribute("border", "1");
+        table.setAttribute("id", "project");
 
         table.appendChild(document.createElement("caption").appendChild(document.createTextNode("Big Head!")).getRootNode());
         var thead = document.createElement("thead");
@@ -532,12 +532,12 @@ class Gantt {
     }
     linkPredecessor(id, predecessor) {
         // console.log(this.trailsPosition);
-        console.log(id, predecessor);
+        // console.log(id, predecessor);
         // var position = this.trailsPosition;
 
         var parent = this.trailsPosition.get(predecessor)
         var current = this.trailsPosition.get(id)
-        console.log(parent, current);
+        // console.log(parent, current);
 
         if (parent) {
             $("#linkPredecessor" + id).remove();

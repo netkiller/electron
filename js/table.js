@@ -140,3 +140,46 @@ function tableSwitch() {
     document.getElementById("table").style.width = 0;
   }
 }
+
+function hideTableColume(colume, status) {
+  // var table = document.getElementsByTagName("table");
+  var table = document.getElementById("project");
+  console.log(status);
+  for (var i = 0, len = table.rows.length; i < len; i++) {
+    // var cell = 
+    if (status) {
+      table.rows[i].cells[colume].style.display = 'none';
+    } else {
+      table.rows[i].cells[colume].style.display = '';
+    }
+
+  }
+}
+
+// function ss(id) {
+//   let column = document.getElementById(id); //获取 tadio元素
+//   let checkVal = column.checked; //获取 radio checked值
+//   let table = document.getElementById("tab");
+//   let trs = table.getElementsByTagName("tr"); //获取所有 tr
+//   let ths = trs[0].getElementsByTagName("th"); // 获取 th
+//   let xb = 0;
+//   for (var i = 0; i < ths.length; i++) {
+//       if (ths[i].getAttribute("name") == id) { 
+//           xb = i;
+//           if (checkVal) {
+//               ths[i].style.display = "";
+//           } else {
+//               ths[i].style.display = "none";
+//           }
+//       }
+//   }
+//   for (var i = 1; i < trs.length; i++) {
+//       let tds = trs[i].getElementsByTagName("td");
+//       if (checkVal) {
+//           tds[xb].style.display = "";
+//       } else {
+//           tds[xb].style.display = "none";
+//       }
+
+//   }
+// }

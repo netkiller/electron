@@ -142,9 +142,25 @@
         <option value="0">-- 无 --</option>
       </select>
       <!-- <input type="submit" value="提交"> -->
-      <button onclick="save()">提交</button> | <button onclick="tableSwitch()">隐藏表格</button> 
+      <button onclick="save()">提交</button> | <button onclick="tableSwitch()">隐藏表格</button> | <button
+        onclick="hideTableColume()">隐藏表格列</button>
       <!-- </form> -->
     </fieldset>
+    <br />
+    <label for="name">任务</label>
+    <input type="checkbox" name="name" onchange="hideTableColume(0, this.checked)" />
+    <label for="start">开始时间</label>
+    <input type="checkbox" name="start" onchange="hideTableColume(1, this.checked)" />
+    <label for="finish">结束时间</label>
+    <input type="checkbox" name="finish" onchange="hideTableColume(2, this.checked)" />
+    <label for="duration">工时</label>
+    <input type="checkbox" name="duration" onchange="hideTableColume(3, this.checked)" />
+    <label for="resource">资源</label>
+    <input type="checkbox" name="resource" onchange="hideTableColume(4, this.checked)" />
+    <label for="predecessor">前置任务</label>
+    <input type="checkbox" name="predecessor" checked="checked" onchange="hideTableColume(5, this.checked)" />
+    <label for="parent">父任务</label>
+    <input type="checkbox" name="parent" checked="checked" onchange="hideTableColume(6, this.checked)" />
   </div>
 </body>
 
@@ -215,6 +231,9 @@
       console.log(error);
     }
   });
+
+  hideTableColume(5, true);
+  hideTableColume(6, true);
 
   var date = new Date();
 
