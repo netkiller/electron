@@ -59,6 +59,7 @@
     th,
     td {
       border: 1px solid grey;
+      white-space: nowrap;
     }
 
     table caption {
@@ -67,7 +68,7 @@
 
     table thead th {
       height: 27px;
-    } 
+    }
 
     table tbody tr {
       height: 30px;
@@ -161,6 +162,8 @@
     <input type="checkbox" name="predecessor" checked="checked" onchange="hideTableColume(5, this.checked)" />
     <label for="parent">父任务</label>
     <input type="checkbox" name="parent" checked="checked" onchange="hideTableColume(6, this.checked)" />
+    <label for="milestone">里程碑</label>
+    <input type="checkbox" name="milestone" checked="checked" onchange="hideTableColume(7, this.checked)" />
   </div>
 </body>
 
@@ -234,6 +237,7 @@
 
   hideTableColume(5, true);
   hideTableColume(6, true);
+  hideTableColume(7, true);
 
   var date = new Date();
 

@@ -121,6 +121,7 @@ class Gantt {
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("资源")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("前置任务")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("父任务")).getRootNode());
+        tr.appendChild(document.createElement('th').appendChild(document.createTextNode("里程碑")).getRootNode());
 
         thead.appendChild(tr);
         table.appendChild(thead);
@@ -481,6 +482,7 @@ class Gantt {
         var milestone = document.createElement('input');
         milestone.setAttribute("type", "checkbox");
         milestone.setAttribute("id", "milestone" + id);
+        milestone.setAttribute("size", "10");
         if (item.milestone) {
             milestone.setAttribute("checked", "checked");
         }
