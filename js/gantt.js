@@ -423,24 +423,14 @@ class Gantt {
             predecessor.appendChild(option);
         });
 
-        // predecessor.addEventListener("click", function (event) {
-        // $.getJSON('http://localhost:8080/project/option/lists', function (data) {
-        //     // console.log(data);
-        //     $.each(data, function (id, item) {
-        //         console.log(id, item)
-        //         var option = document.createElement("option");
-        //         option.setAttribute("value", item[0]);
-        //         option.appendChild(document.createTextNode(item[1]).getRootNode());
-        //         predecessor.appendChild(option);
-        //     }.bind(predecessor));
-        // }.bind(this));
-        // }, true);
         predecessor.addEventListener("change", function (event) {
-            //     // this.style.background = "pink";
+
+            var pid = document.getElementById("predecessor" + id).value;
+            this.linkPredecessor(id, Number(pid));
             $.ajax({
                 method: 'POST',
                 url: 'http://localhost:8080/project/change',
-                data: JSON.stringify({ id: id, predecessor: this.value }),
+                data: JSON.stringify({ id: id, predecessor: pid }),
                 dataType: 'json',
                 contentType: 'application/json',
                 success: function (data) {
@@ -450,7 +440,8 @@ class Gantt {
                     console.log(error);
                 }
             });
-        }, true);
+
+        }.bind(this), true);
 
         var parent = document.createElement('select');
         parent.setAttribute("id", "parent" + id)
@@ -541,12 +532,12 @@ class Gantt {
     }
     linkPredecessor(id, predecessor) {
         // console.log(this.trailsPosition);
-        // console.log(id, predecessor);
+        console.log(id, predecessor);
         // var position = this.trailsPosition;
 
         var parent = this.trailsPosition.get(predecessor)
         var current = this.trailsPosition.get(id)
-        // console.log(parent, current);
+        console.log(parent, current);
 
         if (parent) {
             $("#linkPredecessor" + id).remove();

@@ -128,3 +128,15 @@ function save() {
     }
   });
 }
+
+function tableSwitch() {
+  var status = document.getElementById("table").style.visibility;
+  // console.log('hide', status);
+  if (status == "hidden") {
+    document.getElementById("table").style.visibility = "visible";//显示
+    document.getElementById("table").removeAttribute('style');
+  } else {
+    document.getElementById("table").style.visibility = "hidden";//隐藏
+    document.getElementById("table").style.width = 0;
+  }
+}

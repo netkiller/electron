@@ -28,7 +28,7 @@
       width: 100%;
       height: 100%;
 
-      display: block;
+      display: flex;
     }
 
     #title {
@@ -36,7 +36,8 @@
     }
 
     #gantt #table {
-      float: left;
+      /* flex: 1; */
+      /* float: left; */
       /* width: 450px; */
       /* width: 100%; */
     }
@@ -111,7 +112,7 @@
   <div id="menu">
 
     <fieldset>
-      <legend>Choose your favorite monster</legend>
+      <legend>添加任务</legend>
       <!-- <form action="http://localhost:8080/project/save" method="POST" target="_blank" accept-charset="UTF-8" enctype="application/json" autocomplete="on" novalidate> -->
       <label for="name">任务</label>
       <input type="text" id="name" name="name" />
@@ -141,8 +142,7 @@
         <option value="0">-- 无 --</option>
       </select>
       <!-- <input type="submit" value="提交"> -->
-      <button onclick="addRow()">添加</button>
-      <button onclick="save()">提交</button>
+      <button onclick="save()">提交</button> | <button onclick="tableSwitch()">隐藏表格</button> 
       <!-- </form> -->
     </fieldset>
   </div>
