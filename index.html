@@ -113,7 +113,7 @@
   <div id="menu">
 
     <fieldset>
-      <legend>添加任务
+      <legend><button onclick="tableSwitch()">隐藏表格</button> 
 
         <input type="checkbox" name="ID" checked="checked" onchange="hideTableColume(0, this.checked)" />
         <label for="ID">ID</label>
@@ -176,7 +176,7 @@
         <option value="0">-- 无 --</option>
       </select>
       <!-- <input type="submit" value="提交"> -->
-      <button onclick="save()">提交</button> | <button onclick="tableSwitch()">隐藏表格</button> | <button
+      <button onclick="save()">提交</button> |  <button
         onclick="hideTableColume()">隐藏表格列</button>
       <!-- </form> -->
     </fieldset>
