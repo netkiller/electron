@@ -1,4 +1,10 @@
 
+npm init vue@latest
+
+  cd vue-project
+  npm install
+  npm run format
+  npm run dev
 
 npm install @svgdotjs/svg.js
     
