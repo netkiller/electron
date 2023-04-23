@@ -113,7 +113,40 @@
   <div id="menu">
 
     <fieldset>
-      <legend>添加任务</legend>
+      <legend>添加任务
+
+        <input type="checkbox" name="ID" checked="checked" onchange="hideTableColume(0, this.checked)" />
+        <label for="ID">ID</label>
+    
+        <input type="checkbox" name="name" onchange="hideTableColume(1, this.checked)" />
+        <label for="name">任务</label>
+    
+        <input type="checkbox" name="start" onchange="hideTableColume(2, this.checked)" />
+        <label for="start">开始时间</label>
+    
+        <input type="checkbox" name="finish" onchange="hideTableColume(3, this.checked)" />
+        <label for="finish">结束时间</label>
+    
+        <input type="checkbox" name="duration" onchange="hideTableColume(4, this.checked)" />
+        <label for="duration">工时</label>
+    
+        <input type="checkbox" name="duration" onchange="hideTableColume(5, this.checked)" />
+        <label for="resource">资源</label>
+    
+        <input type="checkbox" name="progress" checked="checked" onchange="hideTableColume(6, this.checked)" />
+        <label for="progress">进度</label>
+    
+        <input type="checkbox" name="predecessor" checked="checked" onchange="hideTableColume(7, this.checked)" />
+        <label for="predecessor">前置任务</label>
+    
+        <input type="checkbox" name="parent" checked="checked" onchange="hideTableColume(8, this.checked)" />
+        <label for="parent">父任务</label>
+    
+        <input type="checkbox" name="milestone" checked="checked" onchange="hideTableColume(9, this.checked)" />
+        <label for="milestone">里程碑</label>
+
+
+      </legend>
       <!-- <form action="http://localhost:8080/project/save" method="POST" target="_blank" accept-charset="UTF-8" enctype="application/json" autocomplete="on" novalidate> -->
       <label for="name">任务</label>
       <input type="text" id="name" name="name" />
@@ -148,22 +181,7 @@
       <!-- </form> -->
     </fieldset>
     <br />
-    <label for="name">任务</label>
-    <input type="checkbox" name="name" onchange="hideTableColume(0, this.checked)" />
-    <label for="start">开始时间</label>
-    <input type="checkbox" name="start" onchange="hideTableColume(1, this.checked)" />
-    <label for="finish">结束时间</label>
-    <input type="checkbox" name="finish" onchange="hideTableColume(2, this.checked)" />
-    <label for="duration">工时</label>
-    <input type="checkbox" name="duration" onchange="hideTableColume(3, this.checked)" />
-    <label for="resource">资源</label>
-    <input type="checkbox" name="resource" onchange="hideTableColume(4, this.checked)" />
-    <label for="predecessor">前置任务</label>
-    <input type="checkbox" name="predecessor" checked="checked" onchange="hideTableColume(5, this.checked)" />
-    <label for="parent">父任务</label>
-    <input type="checkbox" name="parent" checked="checked" onchange="hideTableColume(6, this.checked)" />
-    <label for="milestone">里程碑</label>
-    <input type="checkbox" name="milestone" checked="checked" onchange="hideTableColume(7, this.checked)" />
+  
   </div>
 </body>
 
@@ -235,30 +253,11 @@
     }
   });
 
-  hideTableColume(5, true);
+  hideTableColume(0, true);
   hideTableColume(6, true);
   hideTableColume(7, true);
-
-  var date = new Date();
-
-  /* 从日期中获取年月日部分 */
-  // var year = date.toLocaleString("default", { year: "numeric" });
-  // var month = date.toLocaleString("default", { month: "2-digit" });
-  // var day = date.toLocaleString("default", { day: "2-digit" });
-  var day = ("0" + date.getDate()).slice(-2);
-  /*格式化月，如果小于9，则补0*/
-  var month = ("0" + (date.getMonth() + 1)).slice(-2);
-
-  /* 生成 yyyy-mm-dd 日期字符串 */
-  var today = date.getFullYear() + "-" + month + "-" + day;
-  var day = ("0" + (date.getDate() + 1)).slice(-2);
-  var tomorrow = date.getFullYear() + "-" + month + "-" + day;
-  console.log(tomorrow);
-
-  const start = document.getElementById("start");
-  start.value = today;
-  const finish = document.getElementById("finish");
-  finish.value = tomorrow;
+  hideTableColume(8, true);
+  hideTableColume(9, true);
 
   // ]]>
 </script>

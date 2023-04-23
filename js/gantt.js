@@ -114,11 +114,13 @@ class Gantt {
         // thead.setAttribute("border", "1");
         var tr = document.createElement("tr");
 
+        tr.appendChild(document.createElement('th').appendChild(document.createTextNode("ID")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("任务")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("开始时间")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("完成时间")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("工时")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("资源")).getRootNode());
+        tr.appendChild(document.createElement('th').appendChild(document.createTextNode("进度")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("前置任务")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("父任务")).getRootNode());
         tr.appendChild(document.createElement('th').appendChild(document.createTextNode("里程碑")).getRootNode());
@@ -150,6 +152,7 @@ class Gantt {
         var finish = item.finish;
         var milestone = item.milestone;
         var parent = item.parent;
+        var progress = this.columeWidth * item.progress;
 
         var group = this.draw.group().attr({ 'name': 'task' });
         var x = this.datePosition.get(start);
@@ -165,6 +168,7 @@ class Gantt {
         if (milestone) {
             var use = this.draw.use(this.ling).move(x, this.top).attr({ 'id': 'task' + id })
             group.add(use)
+            group.add(this.draw.text(start).attr({ x: x + this.columeWidth * 2, y: this.top + 23, "font-size": 20 }));
         }
         else if (parent == true) {
             // <path d="M 0 0 V 50 L 25 25 H 300 L 325 50 V 350 0" />
@@ -177,12 +181,12 @@ class Gantt {
         else {
             group.add(this.draw.rect(width + this.columeWidth - 1, this.barHeight).attr({ x: x, y: this.top + 5, fill: '#f06', 'id': 'task' + id, 'class': 'taskbar' }).click(function () {
                 //     this.stroke({ color: '#ffffff' })
-                moveProcess(id);
+                moveProgress(id);
             }))
 
-            group.add(this.draw.rect(0, this.barHeight - 6).attr({ x: x, y: this.top + 8, fill: '#ffee00', 'id': 'process' + id, 'class': 'process' }).click(function () {
+            group.add(this.draw.rect(progress, this.barHeight - 6).attr({ x: x, y: this.top + 8, fill: '#ffee00', 'id': 'progressBar' + id, 'class': 'process' }).click(function () {
                 // this.fill({ color: '#ffffff' })
-                moveProcess(id);
+                moveProgress(id);
             }))
         }
         group.add(this.draw.line(0, this.top + this.rowHeight, '100%', this.top + this.rowHeight).stroke('grey'));
@@ -404,6 +408,39 @@ class Gantt {
                 }
             });
         }, true);
+
+        var progress = document.createElement('input');
+        progress.setAttribute("id", "progress" + id);
+        // var day = (new Date(item.finish) - new Date(item.start)) / (1 * 24 * 60 * 60 * 1000) + 1;
+        // console.log(new Date(finishDate), new Date(startDate), (new Date(finishDate) - new Date(startDate)), (1 * 24 * 60 * 60 * 1000), day);
+        progress.setAttribute("value", item.progress);
+        progress.setAttribute("size", "2");
+        progress.setAttribute("type", "number");
+        progress.setAttribute("min", "0");
+        progress.setAttribute("max", "31");
+        progress.addEventListener('change', function () {
+            var duration = Number(document.getElementById("duration" + id).value);
+            var progress = Number(document.getElementById("progress" + id).value);
+            console.log(duration, progress);
+            if (progress > duration) {
+                return;
+            }
+            this.changeProgress(id, progress);
+            $.ajax({
+                method: 'POST',
+                url: 'http://localhost:8080/project/change',
+                data: JSON.stringify({ id: id, progress: progress }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        }.bind(this));
+
         // console.log(item)
         var predecessor = document.createElement('select');
         predecessor.setAttribute("id", "predecessor" + id)
@@ -511,11 +548,13 @@ class Gantt {
             this.style.background = "white";
         }, true);
 
+        tr.appendChild(document.createElement('td').appendChild(document.createTextNode(item.id).getRootNode()).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(task).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(start).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(finish).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(duration).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(resource).getRootNode());
+        tr.appendChild(document.createElement('td').appendChild(progress).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(predecessor).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(parent).getRootNode());
         tr.appendChild(document.createElement('td').appendChild(milestone).getRootNode());
@@ -540,6 +579,12 @@ class Gantt {
         position.set('width', width);
         this.trailsPosition.set(id, position);
         // console.log("------2-----");
+    }
+    changeProgress(id, progress) {
+        var width = this.columeWidth * Number(progress) + Number(progress)
+        var bar = document.getElementById("progressBar" + id);
+        // bar.setAttribute("x", x);
+        bar.style['width'] = width;
     }
     addTaskList(data) {
         // this.taskLists.set()
