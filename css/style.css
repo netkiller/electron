@@ -1,0 +1,71 @@
+#gantt {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+}
+
+#title {
+    color: #f06;
+}
+
+#gantt #table {
+    /* flex: 1; */
+    /* float: left; */
+    /* width: 450px; */
+    /* width: 100%; */
+}
+
+#gantt #chart {
+    /* width: 100%; */
+    /* float: right; */
+    float: left;
+    overflow-x: auto;
+    /* margin-left: 400px; */
+    /* margin-left: 410px; */
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table,
+th,
+td {
+    border: 1px solid grey;
+    white-space: nowrap;
+}
+
+table caption {
+    height: 59px;
+}
+
+table thead th {
+    height: 27px;
+}
+
+table tbody tr {
+    height: 30px;
+}
+
+.taskbar {
+    cursor: e-resize;
+}
+
+.process {
+    cursor: e-resize;
+}
+
+#main {
+    float: :left;
+}
+
+#menu {
+    float: unset;
+    display: block;
+}
+
+/* form */
+#number {
+    width: 3em;
+}

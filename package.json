@@ -10,11 +10,12 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.5",
-    "electron": "^23.1.4"
+    "electron": "^23.3.0"
   },
   "dependencies": {
     "@svgdotjs/svg.js": "^3.1.2",
     "appdmg": "^0.6.6",
-    "jquery": "^3.6.4"
+    "jquery": "^3.6.4",
+    "request": "^2.88.2"
   }
 }

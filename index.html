@@ -11,6 +11,10 @@
   <script src="svg/svg.min.js"></script>
   <script src="js/jquery-3.6.4.min.js"></script>
 
+  <style type="text/css">
+    @import"css/style.css";
+  </style>
+
   <script>
     // run this function when the document is loaded
     window.onload = function () {
@@ -24,83 +28,17 @@
     }
   </script>
   <style>
-    #gantt {
-      width: 100%;
-      height: 100%;
-
-      display: flex;
-    }
-
-    #title {
-      color: #f06;
-    }
-
-    #gantt #table {
-      /* flex: 1; */
-      /* float: left; */
-      /* width: 450px; */
-      /* width: 100%; */
-    }
-
-    #gantt #chart {
-      /* width: 100%; */
-      /* float: right; */
-      float: left;
-      overflow-x: auto;
-      /* margin-left: 400px; */
-      /* margin-left: 410px; */
-    }
-
-    table {
-      border-collapse: collapse;
-    }
-
-    table,
-    th,
-    td {
-      border: 1px solid grey;
-      white-space: nowrap;
-    }
-
-    table caption {
-      height: 59px;
-    }
-
-    table thead th {
-      height: 27px;
-    }
-
-    table tbody tr {
-      height: 30px;
-    }
-
-    .taskbar {
-      cursor: e-resize;
-    }
-
-    .process {
-      cursor: e-resize;
-    }
-
-    #main {
-      float: :left;
-    }
-
-    #menu {
-      float: unset;
-      display: block;
-    }
-
-    /* form */
-    #number {
-      width: 3em;
+    #profile {
+      float: right;
     }
   </style>
 </head>
 
 <body>
 
-
+  <div id="toolbar">
+    <div id="profile"><a href="login.html">未登录</a></div>
+  </div>
   <div id="main">
     <div id="title"></div>
     <div id="gantt">
@@ -113,35 +51,35 @@
   <div id="menu">
 
     <fieldset>
-      <legend><button onclick="tableSwitch()">隐藏表格</button> 
+      <legend><button onclick="tableSwitch()">隐藏表格</button>
 
         <input type="checkbox" name="ID" checked="checked" onchange="hideTableColume(0, this.checked)" />
         <label for="ID">ID</label>
-    
+
         <input type="checkbox" name="name" onchange="hideTableColume(1, this.checked)" />
         <label for="name">任务</label>
-    
+
         <input type="checkbox" name="start" onchange="hideTableColume(2, this.checked)" />
         <label for="start">开始时间</label>
-    
+
         <input type="checkbox" name="finish" onchange="hideTableColume(3, this.checked)" />
         <label for="finish">结束时间</label>
-    
+
         <input type="checkbox" name="duration" onchange="hideTableColume(4, this.checked)" />
         <label for="duration">工时</label>
-    
+
         <input type="checkbox" name="duration" onchange="hideTableColume(5, this.checked)" />
         <label for="resource">资源</label>
-    
+
         <input type="checkbox" name="progress" checked="checked" onchange="hideTableColume(6, this.checked)" />
         <label for="progress">进度</label>
-    
+
         <input type="checkbox" name="predecessor" checked="checked" onchange="hideTableColume(7, this.checked)" />
         <label for="predecessor">前置任务</label>
-    
+
         <input type="checkbox" name="parent" checked="checked" onchange="hideTableColume(8, this.checked)" />
         <label for="parent">父任务</label>
-    
+
         <input type="checkbox" name="milestone" checked="checked" onchange="hideTableColume(9, this.checked)" />
         <label for="milestone">里程碑</label>
 
@@ -176,12 +114,11 @@
         <option value="0">-- 无 --</option>
       </select>
       <!-- <input type="submit" value="提交"> -->
-      <button onclick="save()">提交</button> |  <button
-        onclick="hideTableColume()">隐藏表格列</button>
+      <button onclick="save()">提交</button> | <button onclick="hideTableColume()">隐藏表格列</button>
       <!-- </form> -->
     </fieldset>
     <br />
-  
+
   </div>
 </body>
 
